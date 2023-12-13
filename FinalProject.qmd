@@ -1,0 +1,143 @@
+---
+title: "Final Project"
+author: "Shalom Mhanda, Sophia Perez"
+format: pdf
+editor: visual
+execute:
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r}
+library(tidyverse) # for ggplot functions/plotting
+library(broom) # for tidy() function
+library(openintro) # for loan data set
+library(GGally) # for ggpairs() function
+```
+
+```{r}
+# Importing data
+saratoga_ny_home_prices <- read.csv("/Users/smhanda/Documents/SDS220/Project/saratoga_ny_home_prices.csv")
+```
+
+# Introduction
+
+# Exploratory Data Analysis
+
+The Saratoga, New York Housing Prices dataset is a random sample of 1057 houses taken from full Saratoga Housing Data (De Veaux). The data contains variables such as price (US Dollars), bedrooms (count), fireplaces (count),living area (square feet), age (years), bathrooms (count), lot size (acres), and fireplace (presence of fireplace, either true or false). The sample represents the houses in Saratoga, New York and their different characteristics. The data was collected as a random sample of the Saratoga houses. We are mainly focusing on checking if the number of bedrooms and number of fireplaces influences the house price. We first take a look at the variables bedrooms and fireplaces individually and how they relate to housing price and then look at both variables together.
+
+## Is number of bedrooms a good predictor of house price?
+
+```{r}
+# Plotting Home price vs number of bedrooms
+ggplot(data = saratoga_ny_home_prices, 
+       aes(x = Bedrooms, 
+           y = Price)) +
+  geom_point(position = "jitter",
+             size = 0.5) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Home Price vs Number of Bedrooms")
+```
+
+We draw a linear regression line to check for linearity between the house price and number of bedrooms.
+
+```{r}
+# Plotting linear regression line
+ggplot(data = saratoga_ny_home_prices, 
+       aes(x = Bedrooms, 
+           y = Price)) +
+  geom_point(position = "jitter",
+             size = 0.5) +
+  geom_smooth(se = F, method = "lm") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Home Price vs Number of Bedrooms")
+```
+
+We plot a residual plot to check if the variables house price and number of bedrooms have normal residuals.
+
+```{r, include = FALSE}
+fit <- lm(Price ~Bedrooms, data = saratoga_ny_home_prices)
+summary(fit)
+```
+
+```{r, echo=FALSE}
+# Residual Plot
+ggplot(fit, aes(x = .fitted, y = .resid)) +
+  geom_point(position = "jitter",
+             size = 0.5) +
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(labels = scales::comma) 
+```
+
+
+## Is the presence of a fireplace a good predictor of house price?
+
+```{r}
+# Plotting Home price vs number of bedrooms
+ggplot(data = saratoga_ny_home_prices, 
+       aes(x = Fireplace, 
+           y = Price,
+           color = Fireplace)) +
+  geom_point(position = "jitter",
+             size = 0.5) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Home Price vs Presence of Fireplace")
+```
+
+We try to draw a linear regression line to check for linearity between the house price and the presence of a fireplace. It seems there is no linearity as a linear line could not be drawn.
+
+```{r}
+# Plotting linear regression line
+ggplot(data = saratoga_ny_home_prices, 
+       aes(x = Fireplace, 
+           y = Price,
+           color = Fireplace)) +
+  geom_point(position = "jitter",
+             size = 0.5) +
+  geom_smooth(se = F, method = "lm") +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Home Price vs Presence of Fireplace")
+```
+
+We plot a residual plot to check if the variables house price and presence of fireplace have normal residuals.
+
+```{r, include = FALSE}
+fit2 <- lm(Price ~Fireplace, data = saratoga_ny_home_prices)
+summary(fit2)
+```
+
+```{r}
+# Residual Plot
+ggplot(fit2, aes(x = .fitted, y = .resid)) +
+  geom_point(position = "jitter",
+             size = 0.5) +
+  geom_hline(yintercept = 0) +
+  scale_y_continuous(labels = scales::comma)
+```
+
+
+## Multiple Predictors: Number of bedrooms and presence of fireplace as predictos of house price
+
+```{r}
+ggplot(saratoga_ny_home_prices, aes(x = Bedrooms, y = Price, color = Fireplace)) +
+  geom_point(position = "jitter",
+             size = 0.5) +
+  scale_y_continuous(labels = scales::comma) +
+  labs(title = "Home Price vs Presence of Fireplace and Number of Bedrooms")
+```
+
+
+# Results
+
+To examine the relationship between number of bedrooms and presence of fireplace(s) on hose price, we do a hyphothesis test for the linear regression with multiple predictors. Our null hypothesis is that the slope of each predictor variable with respect to the response variable is 0. given other variables in the model. The alternative hupothesis is that the slope is not zero, given other variables. Our data comes from a random sample so it is independent. 
+
+```{r}
+lm(Price ~ Bedrooms + Fireplace, data = saratoga_ny_home_prices) |>
+  tidy()
+```
+
+Our p values for bedrooms and fireplace(True) are lvery small and less than $\alpha = 0.05$. Therefore, we colcude against the null hypothesis. The number of bedrooms and presence of fireplaces do not seem to be good predictors of house prices.
+
+
+# Conclusion
